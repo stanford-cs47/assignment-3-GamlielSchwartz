@@ -7,35 +7,48 @@
 * Oct, 2018
 */
 
-import React, { Component } from 'react'
-import PropTypes from 'prop-types' //consider using this!
-import { StyleSheet, SafeAreaView, View, FlatList, Text, Linking } from 'react-native'
-import { material } from 'react-native-typography' //consider using this!
-import { Metrics, Colors } from '../Themes'
+import React, {useState} from 'react'
+import { StyleSheet, View, FlatList, ActivityIndicator } from 'react-native'
+import Article from './Article';
 
-export default class News extends Component {
-  static defaultProps = { articles: [] }
+export default function News(props) {
 
-  static propTypes = {
-    articles: PropTypes.array
+  const styles = StyleSheet.create({
+    newsContainer: { flex: 10, 
+      flexDirection: 'row', 
+      justifyContent: props.loading ? 'center' : 'flex-start' 
+    },
+  });
+
+  function test(){
+    console.log("test");
   }
+  return (
+    <View style={styles.newsContainer}>
+      {
+        props.loading
+          ?
+          <ActivityIndicator size="large" color="#0000ff" />
+          :
+          <FlatList
+            style={{ flex: 10 }}
+            data={props.articles}
+            renderItem={
+              ({ item }) =>
+                <Article
+                  title={item.title}
+                  snippet={item.snippet}
+                  byline={item.byline}
+                  date={item.date}
+                  url={item.url}
+                  setArticles={(url) => props.setArticles(url)}
+                />
+            }
 
-  //you can change the props above to whatever you want/need.
-
-  render () {
-    const {articles} = this.props;
-
-    return (
-      <View style={styles.container}>
-        {/*Some FlatList or SectionList*/}
-      </View>
-    );
-  }
+            keyExtractor={(item, index) => index.toString()}
+          />
+      }
+    </View>
+  )
 }
 
-
-const styles = StyleSheet.create({
-  container: {
-
-  },
-});

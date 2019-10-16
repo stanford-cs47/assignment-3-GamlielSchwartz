@@ -8,24 +8,12 @@
 */
 
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Image, TextInput, Button, Alert, FlatList, ActivityIndicator } from 'react-native';
-import { Images, Colors } from './App/Themes'
+import { StyleSheet, View, SafeAreaView, Image, Keyboard } from 'react-native';
+import { Images } from './App/Themes'
 import APIRequest from './App/Config/APIRequest'
 import News from './App/Components/News'
 import Search from './App/Components/Search'
 import metrics from './App/Themes/Metrics';
-import Article from './App/Components/Article';
-
-// function Article({ title, snippet, byline, date }) {
-//   return (
-//     <View style={styles.article}>
-//       <Text >{title}</Text>
-//       <Text >{snippet}</Text>
-//       <Text >{byline}</Text>
-//       <Text >{date}</Text>
-//     </View>
-//   );
-// }
 
 export default class App extends React.Component {
 
@@ -37,8 +25,6 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-
-    //uncomment this to run an API query!
     this.loadArticles();
   }
 
@@ -50,7 +36,6 @@ export default class App extends React.Component {
     } else {
       resultArticles = await APIRequest.requestCategoryPosts(category);
     }
-    console.log(resultArticles);
     this.setState({ loading: false, articles: resultArticles })
   }
 
@@ -59,8 +44,14 @@ export default class App extends React.Component {
   }
 
   search() {
-    Alert.alert(this.state.searchText);
+    this.loadArticles(this.state.searchText, '');
     this.setState({ searchText: '' })
+    Keyboard.dismiss();
+  }
+
+  setArticles(urlToFilerOut) {
+    const newArticles = this.state.articles.filter((item) => item.url !== urlToFilerOut);
+    this.setState({ articles: newArticles });
   }
 
   render() {
@@ -74,32 +65,12 @@ export default class App extends React.Component {
             onChangeText={(text) => this.onChangeText(text)}
             searchFunc={() => this.search()}
           />
-          <View style={{ flex: 10, flexDirection: 'row', justifyContent: loading ? 'center' : 'flex-start' }}>
-            {
-              loading
-                ?
-                <ActivityIndicator size="large" color="#0000ff" />
-                :
-                <FlatList
-                  style={{ flex: 10 }}
-                  data={articles}
-                  renderItem={
-                    ({ item }) => 
-                      <Article
-                        title={item.title}
-                        snippet={item.snippet}
-                        byline={item.byline}
-                        date={item.date}
-                        url={item.url}
-                      />
-                    }
-                  
-                  keyExtractor={(item, index) => index.toString()}
-                />
-            }
-          </View>
+          <News
+            articles={articles}
+            loading={loading}
+            setArticles={this.setArticles.bind(this)}
+          />
         </View>
-
       </SafeAreaView>
     );
   }
